@@ -29,9 +29,9 @@ const button = document.getElementById("test");
 function handleSubmit(e) {
 
   e.preventDefault();
-  const secret = 'ES_531e1de532584a2b914d79a5933670b9';
+  const secret = '0x0000000000000000000000000000000000000000';
   const token = window.hcaptcha.getResponse();
-  const verifyUrl = 'https://api.hcaptcha.com/siteverify';
+  const verifyUrl = `https://api.hcaptcha.com/siteverify?secret=${secret}&response=${token}`;
   console.log(token);
 
 
@@ -42,11 +42,11 @@ data.append('response', token);
 
 // Make a POST request with data payload to hCaptcha API endpoint.
 fetch(verifyUrl, {
-    method: 'POST',
-    body: data,
+    method: 'GET',
+    credentials: 'include',
     headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
+      'Content-Type': 'application/x-www-form-urlencoded',
+  },
 })
 .then(response => response.json()) 
 .then(data => {
