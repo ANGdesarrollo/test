@@ -25,40 +25,72 @@ setupCounter(document.querySelector('#counter'))
 
 const button = document.getElementById("test");
 
+// if using synchronous loading, will be called once the DOM is ready
+const SECRET_KEY = '0x4AAAAAAAS8Tq_7Ft70yeWazXsQGiAhcjg';
+turnstile.render('#example-container', {
+  sitekey: '0x4AAAAAAAS8Tq7Wa-1P9ERU',
+  callback: function (token) {
+      console.log(`Challenge Success ${token}`);
+      
+      // Validate Turnstile token using siteverify endpoint
+      const turnstileSecret = SECRET_KEY; // Replace with your Turnstile secret key
+      const turnstileUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+
+      const turnstileData = new URLSearchParams();
+      turnstileData.append('secret', turnstileSecret);
+      turnstileData.append('response', token);
+
+      fetch(turnstileUrl, {
+          method: 'POST',
+          body: turnstileData,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              // Turnstile token validation successful, continue with your logic
+              console.log('Turnstile token validation successful');
+              
+              // Your existing form submission logic...
+          } else {
+              // Turnstile token validation failed, handle accordingly
+              console.error('Turnstile token validation failed');
+          }
+      })
+      .catch(error => {
+          console.error('Error during Turnstile token validation:', error);
+      });
+  },
+});
+
+
+async function handlePost(request) {
+	const token = body.get('cf-turnstile-response');
+	const ip = request.headers.get('CF-Connecting-IP');
+
+	// Validate the token by calling the
+	// "/siteverify" API endpoint.
+	let formData = new FormData();
+	formData.append('secret', SECRET_KEY);
+	formData.append('response', token);
+	formData.append('remoteip', ip);
+
+	const url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+	const result = await fetch(url, {
+		body: formData,
+		method: 'POST',
+	});
+
+	const outcome = await result.json();
+	if (outcome.success) {
+		// ...
+	}
+}
 
 function handleSubmit(e) {
-
-  e.preventDefault();
-  const secret = '0x0000000000000000000000000000000000000000';
-  const token = window.hcaptcha.getResponse();
-  const verifyUrl = `https://api.hcaptcha.com/siteverify?secret=${secret}&response=${token}`;
-  console.log(token);
-
-
-// Build payload with secret key and token.
-let data = new URLSearchParams();
-data.append('secret', secret);
-data.append('response', token);
-
-// Make a POST request with data payload to hCaptcha API endpoint.
-fetch(verifyUrl, {
-    method: 'GET',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-  },
-})
-.then(response => response.json()) 
-.then(data => {
-    if (data.success) {
-        console.log('Successfully verified the user');
-    } else {
-        console.log('Error in verifying the user', data['error-codes']);
-    }
-})
-.catch((error) => {
-    console.error('Error:', error);
-});
+  
 }
 
 button.addEventListener("click", handleSubmit);

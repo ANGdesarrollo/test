@@ -6,11 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
   </head>
   <body>
     <div id="app"></div>
     <div id="signupCaptcha" class="h-captcha" data-sitekey="20000000-ffff-ffff-ffff-000000000002"></div>
     <button id="test">click</button>
+    <div id="example-container"></div>
     <script type="module" src="/main.js"></script>
   </body>
 </html>
