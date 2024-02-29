@@ -24,44 +24,41 @@ document.querySelector('#app').innerHTML = `
 setupCounter(document.querySelector('#counter'))
 
 const button = document.getElementById("test");
-const verifyUrl = 'https://api.hcaptcha.com/siteverify';
+
 
 function handleSubmit(e) {
-  console.log("entre al form")
+
   e.preventDefault();
   const secret = 'ES_531e1de532584a2b914d79a5933670b9';
   const token = window.hcaptcha.getResponse();
+  const verifyUrl = 'https://api.hcaptcha.com/siteverify';
+  console.log(token);
 
-  const postData = new URLSearchParams();
-  postData.append('response', token)  // Reemplaza con tu token de hCaptcha
-  postData.append('secret', secret);
-  const requestOptions = {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: postData.toString(),
-  };
 
-  fetch(verifyUrl, requestOptions)
-      .then(response => response.json())
-      .then(data => {
-          // Manejar la respuesta del servidor
-          console.log('Respuesta del servidor:', data);
+// Build payload with secret key and token.
+let data = new URLSearchParams();
+data.append('secret', secret);
+data.append('response', token);
 
-          if (data.success) {
-              // El token de hCaptcha es válido, continuar con la lógica del negocio
-              console.log('Token de hCaptcha válido');
-          } else {
-              // La verificación del token de hCaptcha falló, manejar en consecuencia
-              console.error('La verificación del token de hCaptcha falló');
-          }
-      })
-      .catch(error => {
-          // Manejar errores durante la solicitud Fetch
-          console.error('Error durante la verificación del token de hCaptcha:', error);
-      });
+// Make a POST request with data payload to hCaptcha API endpoint.
+fetch(verifyUrl, {
+    method: 'POST',
+    body: data,
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+})
+.then(response => response.json()) 
+.then(data => {
+    if (data.success) {
+        console.log('Successfully verified the user');
+    } else {
+        console.log('Error in verifying the user', data['error-codes']);
+    }
+})
+.catch((error) => {
+    console.error('Error:', error);
+});
 }
 
 button.addEventListener("click", handleSubmit);
